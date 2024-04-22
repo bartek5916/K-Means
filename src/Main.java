@@ -18,6 +18,8 @@ public class Main {
 
         for(Cluster c :  Cluster.getClusters()){
             System.out.println(c);
+            c.updateCentroid();
+            System.out.println(c.getCentroid());
         }
 
     }
