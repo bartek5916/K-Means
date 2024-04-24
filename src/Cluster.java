@@ -1,21 +1,18 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Cluster{
     private static List<Cluster> clusters = new ArrayList<>();
     private List<Iris> clusterIrises;
-    private static int nextId = 1;
+    private static int nextId = 0;
     private int Id;
     private Iris centroid;
     public Cluster() {
         clusterIrises = new ArrayList<>();
         clusters.add(this);
-        this.Id = nextId++;
+        this.Id = ++nextId;
     }
 
     public static void createClusters(int k){
@@ -32,6 +29,11 @@ public class Cluster{
     }
 
     public void updateCentroid(){
+        if(clusterIrises.size() == 0){
+            return;
+        }
+
+        //Sumowanie poszczególnych atrybutów w clustrze
         int attributesAmount = clusterIrises.get(0).getAttributesAmount();
         var sumOfEachAttributeValue = new ArrayList<Double>(Collections.nCopies(attributesAmount, 0.0));
         for(int i = 0; i < clusterIrises.size(); i++){
@@ -42,7 +44,7 @@ public class Cluster{
             }
         }
 
-        //Dzielenie zsumowanych atrybutow wszystkich wektorow przez ilosc obserwacji w clustrze
+        //Dzielenie zsumowanych atrybutow wszystkich wektorow przez ilosc Irysow w clustrze
         for(int i = 0; i < sumOfEachAttributeValue.size(); i++){
             sumOfEachAttributeValue.set(i, sumOfEachAttributeValue.get(i)/clusterIrises.size());
         }
@@ -50,23 +52,51 @@ public class Cluster{
         this.centroid = new Iris(sumOfEachAttributeValue);
     }
 
+    //Sumowanie odleglosci Irysow w clustrze od jego centroidu
+    public double calculateCombinedDistance(){
+        double distance = 0;
+        for(Iris i : clusterIrises){
+            distance += Iris.calculateDistBetweenTwoPoints(i, this.centroid);
+        }
+
+        return distance;
+    }
+
     public void addIris(Iris iris){
         this.clusterIrises.add(iris);
+    }
+
+
+    //Gettery
+    public int getId() {
+        return Id;
+    }
+    public Iris getCentroid(){
+        return this.centroid;
     }
 
     public static List<Cluster> getClusters() {
         return clusters;
     }
 
-    public static int getNextId() {
-        return nextId;
+
+    public List<Iris> getClusterIrises() {
+        return clusterIrises;
     }
 
-    public int getId() {
-        return Id;
+
+    //Przesloniete metody
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        Cluster cluster = (Cluster) o;
+        return centroid.equals(cluster.centroid);
     }
-    public Iris getCentroid(){
-        return this.centroid;
+
+    @Override
+    public int hashCode() {
+        return this.hashCode();
     }
 
     @Override
